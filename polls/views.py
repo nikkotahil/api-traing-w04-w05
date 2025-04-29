@@ -151,7 +151,7 @@ class SendPollReportEmailView(APIView):
         data = [{'Choices': c.choice_text, 'Votes': c.votes} for c in question.choices.all()]
         df = pd.DataFrame(data)
         df.to_excel(excel_path, index=False, engine='openpyxl', startrow=1)
-        df.columns = ['Choices', 'Votes']  # Force columns again just in case
+        df.columns = ['Choices', 'Votes']
 
         with pd.ExcelWriter(excel_path, engine='openpyxl', mode='a', if_sheet_exists='overlay') as writer:
             sheet = writer.sheets['Sheet1']
