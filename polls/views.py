@@ -3,16 +3,15 @@ import os
 import pandas as pd
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied, NotFound
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from api_project_04_05 import settings
+from polls.documents import QuestionDocument
+from polls.search import search_questions
 from polls.tasks import send_poll_report_email
-
 from weasyprint import HTML
-
 from polls.models import Question
 from polls.serializers import (
     QuestionListSerializer,
@@ -125,11 +124,9 @@ class PollPDFReportView(APIView):
             'choices': choices,
         })
 
-        # Generate PDF
         html = HTML(string=html_string)
         pdf_file = html.write_pdf()
 
-        # Create response
         response = HttpResponse(pdf_file, content_type='application/pdf')
         filename = f"poll_{question.id}_report.pdf"
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
@@ -165,3 +162,12 @@ class SendPollReportEmailView(APIView):
         send_poll_report_email.delay(subject, message, to_email, excel_path, os.path.basename(excel_path))
 
         return Response({'message': 'POST SendPollReportEmailView'})
+
+
+class SearchPollsView(APIView):
+    def get(self, request):
+        query = request.query_params.get('s', '')
+        if query:
+            results = search_questions(query)
+            return Response({"results": [result.question_text for result in results]})
+        return Response({"message": "No query provided"})

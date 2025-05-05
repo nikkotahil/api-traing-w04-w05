@@ -10,4 +10,5 @@ urlpatterns = [
     path('<int:pk>/report/', views.QuestionExcelReportView.as_view(), name='poll-excel-report'),
     path('<int:pk>/report/pdf/', views.PollPDFReportView.as_view(), name='poll-pdf-report'),
     path('<int:pk>/send-email/', views.SendPollReportEmailView.as_view(), name='send-poll-report-email'),
+    path('search/', views.SearchPollsView.as_view(), name='poll-search'),
 ]
